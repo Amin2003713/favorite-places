@@ -1,27 +1,85 @@
 import 'package:favorite_places/features/places/components/add_place.dart';
+import 'package:favorite_places/features/places/states/places_states.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class PlacesScreen extends StatefulWidget {
+class PlacesScreen extends ConsumerStatefulWidget {
   const PlacesScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _PlacesScreenState();
+  ConsumerState<PlacesScreen> createState() => _PlacesScreenState();
 }
 
-class _PlacesScreenState extends State<PlacesScreen> {
+class _PlacesScreenState extends ConsumerState<PlacesScreen> {
   void _addNewPlace() {
     Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (context) => AddPlace()));
   }
 
+  void _onDismiss(String placeId) {
+    ref.read(PlaceProvider.notifier).removePlace(placeId);
+  }
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: Text('Great Places'),
-      actions: [IconButton(onPressed: _addNewPlace, icon: Icon(Icons.add))],
-      elevation: 1.2,
-    ),
-    body: Text('data'),
-  );
+  Widget build(BuildContext context) {
+    final places = ref.watch(PlaceProvider);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Great Places'),
+        actions: [
+          IconButton(onPressed: _addNewPlace, icon: const Icon(Icons.add)),
+        ],
+        elevation: 1.2,
+      ),
+      body: places.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Nothing here yet...'),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                    onPressed: _addNewPlace,
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Item'),
+                  ),
+                ],
+              ),
+            )
+          : ListView.builder(
+              itemCount: places.length,
+              itemBuilder: (ctx, index) {
+                final item = places[index];
+                return Dismissible(
+                  key: ValueKey(item.id),
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(4),
+                      color: Theme.of(context).colorScheme.error.withAlpha(51),
+                    ),
+                    child: const Icon(Icons.delete, color: Colors.red),
+                  ),
+                  direction: DismissDirection.endToStart,
+                  onDismissed: (_) => _onDismiss(item.id),
+                  child: Card(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    elevation: 3,
+                    child: ListTile(
+                      title: Text(item.name),
+                      leading: const Icon(Icons.place), // or an avatar
+                      trailing: const Icon(Icons.chevron_right),
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
 }

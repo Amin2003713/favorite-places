@@ -1,6 +1,9 @@
+import 'package:favorite_places/features/places/models/palce.dart';
+import 'package:favorite_places/features/places/states/places_states.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class AddPlace extends StatelessWidget {
+class AddPlace extends ConsumerWidget {
   AddPlace({super.key});
 
   final _formKey = GlobalKey<FormState>();
@@ -10,15 +13,17 @@ class AddPlace extends StatelessWidget {
     _formKey.currentState!.reset();
   }
 
-  void _save() {
+  void _save(WidgetRef ref, BuildContext context) {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    ref.read(PlaceProvider.notifier).addNewPlace(Place(name: _name));
 
+    Navigator.of(context).pop();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add new place')),
       body: Form(
@@ -49,7 +54,7 @@ class AddPlace extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   FilledButton.icon(
-                    onPressed: _save,
+                    onPressed: () => _save(ref, context),
                     icon: const Icon(Icons.save),
                     label: const Text('Save'),
                   ),
