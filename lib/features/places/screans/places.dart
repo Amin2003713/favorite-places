@@ -72,7 +72,14 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
                     ),
                     elevation: 3,
                     child: ListTile(
-                      title: Text(item.name),
+                      title: Text(
+                        item.name,
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).textTheme.displayMedium!.color,
+                        ),
+                      ),
                       leading: const Icon(Icons.place), // or an avatar
                       trailing: const Icon(Icons.chevron_right),
                     ),

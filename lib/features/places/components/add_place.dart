@@ -7,7 +7,7 @@ class AddPlace extends ConsumerWidget {
   AddPlace({super.key});
 
   final _formKey = GlobalKey<FormState>();
-  late final String _name;
+  String _name = '';
 
   void _reset() {
     _formKey.currentState!.reset();
@@ -17,6 +17,8 @@ class AddPlace extends ConsumerWidget {
     if (!_formKey.currentState!.validate()) {
       return;
     }
+    _formKey.currentState!.save();
+
     ref.read(PlaceProvider.notifier).addNewPlace(Place(name: _name));
 
     Navigator.of(context).pop();
