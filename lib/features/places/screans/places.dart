@@ -3,6 +3,8 @@ import 'package:favorite_places/features/places/states/places_states.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../components/place_info.dart';
+
 class PlacesScreen extends ConsumerStatefulWidget {
   const PlacesScreen({super.key});
 
@@ -19,6 +21,12 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
 
   void _onDismiss(String placeId) {
     ref.read(PlaceProvider.notifier).removePlace(placeId);
+  }
+
+  _navigateToPage(String id) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => PlaceInfo(placeId: id)));
   }
 
   @override
@@ -72,6 +80,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
                     ),
                     elevation: 3,
                     child: ListTile(
+                      onTap: () => _navigateToPage(item.id),
                       title: Text(
                         item.name,
                         style: TextStyle(
@@ -81,7 +90,7 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
                         ),
                       ),
                       leading: const Icon(Icons.place), // or an avatar
-                      trailing: const Icon(Icons.chevron_right),
+                      trailing: Icon(Icons.chevron_right),
                     ),
                   ),
                 );

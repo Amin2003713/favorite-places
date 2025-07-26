@@ -1,3 +1,4 @@
+import 'package:favorite_places/features/places/components/image_input.dart';
 import 'package:favorite_places/features/places/models/palce.dart';
 import 'package:favorite_places/features/places/states/places_states.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,8 @@ class AddPlace extends ConsumerWidget {
                 },
                 onSaved: (newValue) => _name = newValue!.trim(),
               ),
+              const SizedBox(height: 14),
+              FormField(builder: (field) => ImageInput()),
               const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
