@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_fave/features/places/components/location_input.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 import '../states/places_states.dart';
 
@@ -27,7 +29,21 @@ class _PlaceInfoState extends ConsumerState<PlaceInfo> {
     return Scaffold(
       appBar: AppBar(title: Text(place.name)),
 
-      body: Text('data2'),
+      body: Card(
+        elevation: 0,
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(16),
+              child: FadeInImage(
+                placeholder: MemoryImage(kTransparentImage),
+                image: FileImage(place.image),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

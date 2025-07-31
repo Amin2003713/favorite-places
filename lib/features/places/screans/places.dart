@@ -79,18 +79,25 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
                       vertical: 6,
                     ),
                     elevation: 3,
-                    child: ListTile(
-                      onTap: () => _navigateToPage(item.id),
-                      title: Text(
-                        item.name,
-                        style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).textTheme.displayMedium!.color,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                        onTap: () => _navigateToPage(item.id),
+                        title: Text(
+                          item.name,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).textTheme.displayMedium!.color,
+                          ),
                         ),
+                        leading: CircleAvatar(
+                          radius: 26,
+                          backgroundImage: FileImage(item.image),
+                        ),
+                        // or an avatar
+                        trailing: Icon(Icons.chevron_right),
                       ),
-                      leading: const Icon(Icons.place), // or an avatar
-                      trailing: Icon(Icons.chevron_right),
                     ),
                   ),
                 );

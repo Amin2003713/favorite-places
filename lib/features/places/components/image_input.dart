@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageInput extends StatefulWidget {
-  const ImageInput({super.key});
+  const ImageInput({super.key, required this.onSave});
+
+  final void Function(File value) onSave;
 
   @override
   State<ImageInput> createState() => _ImageInputState();
@@ -28,6 +30,7 @@ class _ImageInputState extends State<ImageInput> {
       setState(() {
         _storedImage = File(imageFile.path);
       });
+      widget.onSave(_storedImage!);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
