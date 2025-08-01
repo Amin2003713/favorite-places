@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:location/location.dart';
 
 class LocationInput extends StatefulWidget {
   @override
@@ -22,12 +23,31 @@ class _LocationInputState extends State<LocationInput> {
     });
   }
 
-  void _getCurrentLocation() {
-    // 👇 اینجا باید مختصات واقعی رو بگیری
-    const dummyLat = 35.6892;
-    const dummyLng = 51.3890; // تهران
+  Future<void> _getCurrentLocation() async {
+    Location location = Location();
 
-    _showPreview(dummyLat, dummyLng);
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+    LocationData locationData;
+
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    locationData = await location.getLocation();
+    _showPreview(locationData!.latitude!, locationData!.longitude!);
   }
 
   void _selectOnMap() {

@@ -73,7 +73,6 @@ class AddPlace extends ConsumerWidget {
                     decoration: const InputDecoration(
                       labelText: 'Name',
                       prefixIcon: Icon(Icons.title),
-                      border: OutlineInputBorder(),
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
