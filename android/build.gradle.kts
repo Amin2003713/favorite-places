@@ -1,12 +1,10 @@
 allprojects {
     repositories {
-//        google()
-//        mavenCentral()
-        maven {
-            url = uri("https://maven.myket.ir")
-        }
+        maven { url = uri("https://repo.ito.gov.ir/gradle/maven_central/") }
+        maven { url = uri("https://maven.myket.ir") }
     }
 }
+
 
 val newBuildDir: Directory = rootProject.layout.buildDirectory.dir("../../build").get()
 rootProject.layout.buildDirectory.value(newBuildDir)

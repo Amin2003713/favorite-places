@@ -10,11 +10,8 @@ pluginManagement {
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
-//        google()
-//        mavenCentral()
-        maven {
-            url = uri("https://maven.myket.ir")
-        }
+        maven { url = uri("https://repo.ito.gov.ir/gradle/maven_central/") }
+        maven { url = uri("https://maven.myket.ir") }
     }
 }
 
