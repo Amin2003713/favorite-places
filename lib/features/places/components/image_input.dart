@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -13,12 +12,12 @@ class ImageInput extends StatefulWidget {
 }
 
 class _ImageInputState extends State<ImageInput> {
-  File? _storedImage;
+  File? selectedImage;
 
-  Future<void> _takePicture() async {
+  Future<void> takePicture() async {
     try {
-      final imagePicker = ImagePicker();
-      final imageFile = await imagePicker.pickImage(
+      final picker = ImagePicker();
+      final imageFile = await picker.pickImage(
         source: ImageSource.camera,
         maxWidth: 600,
         maxHeight: 600,
@@ -28,13 +27,14 @@ class _ImageInputState extends State<ImageInput> {
       if (imageFile == null) return;
 
       setState(() {
-        _storedImage = File(imageFile.path);
+        selectedImage = File(imageFile.path);
       });
-      widget.onSave(_storedImage!);
+
+      widget.onSave(selectedImage!);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Failed to pick image: $e")));
+      ).showSnackBar(SnackBar(content: Text("Failed to take picture: $e")));
     }
   }
 
@@ -42,58 +42,56 @@ class _ImageInputState extends State<ImageInput> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.all(12),
-      child: Column(
-        children: [
-          Container(
-            height: 250,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Image',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            height: 180,
             width: double.infinity,
-            alignment: Alignment.center,
             decoration: BoxDecoration(
-              border: Border.all(
-                width: 1,
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
-              ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.shade300),
             ),
-            child: _storedImage == null
-                ? const Text(
+            alignment: Alignment.center,
+            child: selectedImage == null
+                ? Text(
                     "No image selected",
-                    style: TextStyle(fontSize: 16),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey,
+                    ),
                   )
-                : ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(12),
-                    ),
-                    child: Image.file(
-                      _storedImage!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: 250,
-                    ),
+                : Image.file(
+                    selectedImage!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: 180,
                   ),
           ),
-          SizedBox(
-            width: double.infinity,
-            child: TextButton.icon(
-              icon: const Icon(Icons.camera_alt),
-              label: Text(
-                _storedImage == null ? "Take Picture" : "Retake Picture",
-              ),
-              onPressed: _takePicture,
-              style: TextButton.styleFrom(
-                foregroundColor: theme.colorScheme.primary,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
+        ),
+
+        const SizedBox(height: 12),
+        IconButton.filledTonal(
+          onPressed: takePicture,
+          icon: const Icon(Icons.camera_alt),
+          tooltip: selectedImage == null ? "Take Picture" : "Retake Picture",
+          style: IconButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

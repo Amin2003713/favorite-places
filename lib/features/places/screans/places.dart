@@ -95,8 +95,15 @@ class _PlacesScreenState extends ConsumerState<PlacesScreen> {
                           radius: 26,
                           backgroundImage: FileImage(item.image),
                         ),
-                        // or an avatar
                         trailing: Icon(Icons.chevron_right),
+                        subtitle: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('lat: ${item.location.latitude}'),
+                            Text('lng: ${item.location.longitude}'),
+                          ],
+                        ),
                       ),
                     ),
                   ),

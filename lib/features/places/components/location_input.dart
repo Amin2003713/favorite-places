@@ -2,131 +2,155 @@ import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 
 class LocationInput extends StatefulWidget {
+  const LocationInput({super.key, required this.onSave});
+
+  final void Function(LocationData location) onSave;
+
   @override
   State<LocationInput> createState() => _LocationInputState();
 }
 
 class _LocationInputState extends State<LocationInput> {
-  String? _previewImageUrl;
+  LocationData? _storedLocation;
+  String? _prev;
+  bool isLoading = false;
 
-  void _showPreview(double lat, double lng) {
-    final staticMapUrl = Uri.parse(
-      'https://maps.googleapis.com/maps/api/staticmap'
-      '?center=$lat,$lng'
-      '&zoom=15&size=600x300&maptype=roadmap'
-      '&markers=color:red%7Clabel:A%7C$lat,$lng'
-      '&key=YOUR_API_KEY', // 🔐 جایگزین کن با کلید واقعی
-    );
+  void showPreview(LocationData location) {
+    try {
+      final staticMapUrl = Uri.parse(
+        'https://maps.googleapis.com/maps/api/staticmap'
+        '?center=${location.longitude!}${location.latitude!}'
+        '&zoom=15&size=600x300&maptype=roadmap'
+        '&markers=color:red%7Clabel:A%7C${location.longitude!},${location.latitude!}'
+        '&key=AIzaSyAOVYRIgupAurZup5y1PRh8Ismb1A3lLao',
+      );
+      setState(() {
+        _prev = staticMapUrl.toString();
+      });
+    } catch (e) {}
 
-    setState(() {
-      _previewImageUrl = staticMapUrl.toString();
-    });
+    widget.onSave(location);
   }
 
-  Future<void> _getCurrentLocation() async {
-    Location location = Location();
+  Future<void> getCurrentLocation() async {
+    final location = Location();
 
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-    LocationData locationData;
-
-    serviceEnabled = await location.serviceEnabled();
+    bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
-      if (!serviceEnabled) {
-        return;
-      }
+      if (!serviceEnabled) return;
     }
 
-    permissionGranted = await location.hasPermission();
+    setState(() => isLoading = true);
+
+    var permissionGranted = await location.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return;
-      }
+      if (permissionGranted != PermissionStatus.granted) return;
     }
 
-    locationData = await location.getLocation();
-    _showPreview(locationData!.latitude!, locationData!.longitude!);
+    final locationData = await location.getLocation();
+
+    setState(() {
+      isLoading = false;
+      _storedLocation = locationData;
+    });
+
+    showPreview(locationData);
   }
 
-  void _selectOnMap() {
-    // 👇 شبیه‌سازی انتخاب دستی مکان روی نقشه
-    const selectedLat = 35.70;
-    const selectedLng = 51.42;
-
-    _showPreview(selectedLat, selectedLng);
+  void selectOnMap() {
+    // final location = LocationData.fromMap();
+    //
+    // showPreview(location);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Location',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Stack(
           children: [
-            Text(
-              'Choose Location',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: _prev != null
+                  ? Image.network(
+                      _prev!,
+                      height: 180,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      height: 180,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: Text(
+                        (_storedLocation == null
+                            ? 'No location selected'
+                            : 'lat${_storedLocation?.latitude}\nlng${_storedLocation?.longitude}'),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              onPressed: _getCurrentLocation,
-              icon: Icon(Icons.my_location),
-              label: Text('Use Current Location'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                foregroundColor: Colors.white,
-                minimumSize: Size(double.infinity, 50),
-              ),
-            ),
-            const SizedBox(height: 12),
-            ElevatedButton.icon(
-              onPressed: _selectOnMap,
-              icon: Icon(Icons.map_outlined),
-              label: Text('Select Location on Map'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.indigo,
-                foregroundColor: Colors.white,
-                minimumSize: Size(double.infinity, 50),
-              ),
-            ),
-            const SizedBox(height: 20),
-            if (_previewImageUrl != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  _previewImageUrl!,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: 200,
-                ),
-              )
-            else
-              Container(
-                alignment: Alignment.center,
-                width: double.infinity,
-                height: 200,
-                decoration: BoxDecoration(
-                  border: Border.all(width: 1, color: Colors.grey),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'No location chosen',
-                  style: TextStyle(color: Colors.grey),
+            if (isLoading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withAlpha(120),
+                  child: const Center(child: CircularProgressIndicator()),
                 ),
               ),
           ],
         ),
-      ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: IconButton.filledTonal(
+                onPressed: getCurrentLocation,
+                icon: const Icon(Icons.my_location),
+                tooltip: 'Get current location',
+                style: IconButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: IconButton.filledTonal(
+                onPressed: selectOnMap,
+                icon: const Icon(Icons.map_outlined),
+                tooltip: 'Pick from map',
+                style: IconButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:location/location.dart';
 
 import '../models/palce.dart';
 import '../states/places_states.dart';
@@ -14,6 +15,7 @@ class AddPlace extends ConsumerWidget {
   final _formKey = GlobalKey<FormState>();
   String _name = '';
   File? _image;
+  LocationData? _locationData;
 
   void _reset() {
     _formKey.currentState?.reset();
@@ -35,7 +37,9 @@ class AddPlace extends ConsumerWidget {
 
     ref
         .read(PlaceProvider.notifier)
-        .addNewPlace(Place(name: _name, image: _image!));
+        .addNewPlace(
+          Place(name: _name, image: _image!, location: _locationData!),
+        );
 
     Navigator.of(context).pop();
   }
@@ -83,35 +87,28 @@ class AddPlace extends ConsumerWidget {
                     onSaved: (newValue) => _name = newValue!.trim(),
                   ),
                   const SizedBox(height: 20),
-                  FormField<File>(
-                    validator: (_) =>
-                        _image == null ? 'Please select an image.' : null,
-                    builder: (field) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          ImageInput(
+                  Row(
+                    children: [
+                      Expanded(
+                        child: FormField(
+                          builder: (field) => ImageInput(
                             onSave: (file) {
                               _image = file;
-                              field.didChange(file);
                             },
                           ),
-                          if (field.hasError)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text(
-                                field.errorText!,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: FormField(
+                          builder: (field) => LocationInput(
+                            onSave: (location) => _locationData = location,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-                  LocationInput(),
+                  const SizedBox(height: 32),
                   const SizedBox(height: 32),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
